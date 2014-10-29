@@ -21,8 +21,14 @@ impl <V: ToString+Ord> FourNode<V> {
     /// Convert a Split into a TwoNode with the middle value as the value of the new parent node
     fn to_two_node(self) -> Node<V> {
         match self {
-            FourNode(v1, v2, v3, None) => TwoNode(v2, box LeafTwoNode(v1), box LeafTwoNode(v3)),
-            FourNode(v1, v2, v3, Some((n1, n2, n3, n4))) => TwoNode(v2, box TwoNode(v1, n1, n2), box TwoNode(v3, n3, n4)),
+            FourNode(v1, v2, v3, None) =>
+                TwoNode(v2,
+                    box LeafTwoNode(v1),
+                    box LeafTwoNode(v3)),
+            FourNode(v1, v2, v3, Some((n1, n2, n3, n4))) =>
+                TwoNode(v2,
+                    box TwoNode(v1, n1, n2),
+                    box TwoNode(v3, n3, n4)),
         }
     }
 }
