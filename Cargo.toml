@@ -1,5 +1,5 @@
 [package]
 
-name = "rust-two-three"
+name = "rust_two_three"
 version = "0.0.1"
 authors = ["Corey Farwell <coreyf@rwell.org>"]
