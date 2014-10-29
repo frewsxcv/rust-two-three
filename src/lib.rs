@@ -8,7 +8,7 @@ struct FourNode<V: ToString+Ord>(V, V, V, Option<(Box<Node<V>>, Box<Node<V>>, Bo
 
 impl <V: ToString+Ord> FourNode<V> {
 
-    fn new(node: Node<V>, value: V) -> FourNode<V> {
+    fn from_leaf_3node_and_value(node: Node<V>, value: V) -> FourNode<V> {
         match node {
             LeafThreeNode(value1, value2) =>
                 if value > value2      { FourNode(value1, value2, value, None) }
@@ -128,7 +128,10 @@ impl <V: ToString+Ord> Node<V> {
             },
 
             // Split if leaf ThreeNode
-            node @ LeafThreeNode(..) => Split(FourNode::new(node, to_insert)),
+            node @ LeafThreeNode(..) => {
+                let four_node = FourNode::from_leaf_3node_and_value(node, to_insert);
+                Split(four_node)
+            },
 
             // Recurse down if internal Node and handle results
             TwoNode(value, box left, box middle) => {
