@@ -90,11 +90,11 @@ impl <V: ToString+Ord> Node<V> {
     }
 
     fn next_direction(&self, to_insert: &V) -> Direction {
-        match *self {
-            TwoNode(ref value, _, _) =>
+        match self {
+            &TwoNode(ref value, _, _) =>
                 if to_insert < value { Left }
                 else                 { Middle },
-            ThreeNode(ref value1, ref value2, _, _, _) =>
+            &ThreeNode(ref value1, ref value2, _, _, _) =>
                 if      to_insert < value1 { Left }
                 else if to_insert > value2 { Right }
                 else                       { Middle },
