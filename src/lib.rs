@@ -1,3 +1,6 @@
+// Many of my decisions were based off the following document
+// https://web.archive.org/web/20140727185616/http://algs4.cs.princeton.edu/33balanced/
+
 use std::cmp::Ord;
 use std::option::{None, Option, Some};
 use std::to_string::ToString;
