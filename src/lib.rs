@@ -129,8 +129,11 @@ impl <V: ToString+Ord> Node<V> {
         match self {
             // Insert if leaf TwoNode
             LeafTwoNode(value) => {
-                if to_insert > value { Fit(LeafThreeNode(value, to_insert)) }
-                else                 { Fit(LeafThreeNode(to_insert, value)) }
+                let (smaller, larger) =
+                    if value < to_insert { (value, to_insert) }
+                    else                 { (to_insert, value) };
+                let new_node = LeafThreeNode(smaller, larger);
+                Fit(new_node)
             },
 
             // Split if leaf ThreeNode
