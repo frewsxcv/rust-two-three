@@ -51,16 +51,12 @@ enum Direction {
 }
 
 
-/// ToNode
-trait ToNode<V: ToString+Ord> {
-    fn to_node(self) -> Node<V>;
-}
-
-
 /// Two
 pub struct Two<V: ToString+Ord>(pub V, pub Box<Node<V>>, pub Box<Node<V>>);
 
 impl <V: ToString+Ord> Two<V> {
+    fn to_node(self) -> Node<V> { TwoNode(self) }
+
     fn to_three(self, other_value: V, other_node: Box<Node<V>>) -> Three<V> {
         let Two(self_value, self_left, self_middle) = self;
         if self_value > other_value {
@@ -71,15 +67,13 @@ impl <V: ToString+Ord> Two<V> {
     }
 }
 
-impl <V: ToString+Ord> ToNode<V> for Two<V> {
-    fn to_node(self) -> Node<V> { TwoNode(self) }
-}
-
 
 /// Three
 pub struct Three<V: ToString+Ord>(pub V, pub V, pub Box<Node<V>>, pub Box<Node<V>>, pub Box<Node<V>>);
 
 impl <V: ToString+Ord> Three<V> {
+    fn to_node(self) -> Node<V> { ThreeNode(self) }
+
     fn to_four(self, other_value: V, other_node: Box<Node<V>>) -> Four<V> {
         let Three(self_value1, self_value2, self_left, self_middle, self_right) = self;
         if other_value < self_value1 {
@@ -88,10 +82,6 @@ impl <V: ToString+Ord> Three<V> {
             Four(self_value1, self_value2, other_value, Some((self_left, self_middle, self_right, other_node)))
         }
     }
-}
-
-impl <V: ToString+Ord> ToNode<V> for Three<V> {
-    fn to_node(self) -> Node<V> { ThreeNode(self) }
 }
 
 
