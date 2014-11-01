@@ -1,6 +1,6 @@
 extern crate rust_two_three;
 
-use rust_two_three::{ThreeNode, LeafThreeNode, TwoNode, LeafTwoNode, TTTree};
+use rust_two_three::{ThreeNode, LeafThreeNode, TwoNode, LeafTwoNode, TTTree, LeafTwo, LeafThree, Two, Three};
 
 
 #[test]
@@ -9,29 +9,29 @@ fn it_works() {
 
     tree.insert(50);
     match tree {
-        TTTree{root: Some(LeafTwoNode(50))} => (),
+        TTTree{root: Some(LeafTwoNode(LeafTwo(50)))} => (),
         _ => fail!(),
     }
 
     tree.insert(50);
     match tree {
-        TTTree{root: Some(LeafTwoNode(50))} => (),
+        TTTree{root: Some(LeafTwoNode(LeafTwo(50)))} => (),
         _ => fail!(),
     }
 
     tree.insert(60);
     match tree {
-        TTTree{root: Some(LeafThreeNode(50, 60))} => (),
+        TTTree{root: Some(LeafThreeNode(LeafThree(50, 60)))} => (),
         _ => fail!(),
     }
 
     tree.insert(70);
     match tree {
         TTTree{root: Some(
-            TwoNode(60,
-                box LeafTwoNode(50),
-                box LeafTwoNode(70)
-            )
+            TwoNode(Two(60,
+                box LeafTwoNode(LeafTwo(50)),
+                box LeafTwoNode(LeafTwo(70))
+            ))
         )} => (),
         _ => fail!(),
     }
@@ -39,10 +39,10 @@ fn it_works() {
     tree.insert(100);
     match tree {
         TTTree{root: Some(
-            TwoNode(60,
-                box LeafTwoNode(50),
-                box LeafThreeNode(70, 100)
-            )
+            TwoNode(Two(60,
+                box LeafTwoNode(LeafTwo(50)),
+                box LeafThreeNode(LeafThree(70, 100))
+            ))
         )} => (),
         _ => fail!(),
     }
@@ -50,10 +50,10 @@ fn it_works() {
     tree.insert(55);
     match tree {
         TTTree{root: Some(
-            TwoNode(60,
-                box LeafThreeNode(50, 55),
-                box LeafThreeNode(70, 100)
-            )
+            TwoNode(Two(60,
+                box LeafThreeNode(LeafThree(50, 55)),
+                box LeafThreeNode(LeafThree(70, 100))
+            ))
         )} => (),
         _ => fail!(),
     }
@@ -61,11 +61,11 @@ fn it_works() {
     tree.insert(68);
     match tree {
         TTTree{root: Some(
-            ThreeNode(60, 70,
-                box LeafThreeNode(50, 55),
-                box LeafTwoNode(68),
-                box LeafTwoNode(100)
-            )
+            ThreeNode(Three(60, 70,
+                box LeafThreeNode(LeafThree(50, 55)),
+                box LeafTwoNode(LeafTwo(68)),
+                box LeafTwoNode(LeafTwo(100))
+            ))
         )} => (),
         _ => fail!(),
     }
@@ -73,11 +73,11 @@ fn it_works() {
     tree.insert(75);
     match tree {
         TTTree{root: Some(
-            ThreeNode(60, 70,
-                box LeafThreeNode(50, 55),
-                box LeafTwoNode(68),
-                box LeafThreeNode(75, 100)
-            )
+            ThreeNode(Three(60, 70,
+                box LeafThreeNode(LeafThree(50, 55)),
+                box LeafTwoNode(LeafTwo(68)),
+                box LeafThreeNode(LeafThree(75, 100))
+            ))
         )} => (),
         _ => fail!(),
     }
@@ -85,16 +85,16 @@ fn it_works() {
     tree.insert(52);
     match tree {
         TTTree{root: Some(
-            TwoNode(60,
-                box TwoNode(52,
-                    box LeafTwoNode(50),
-                    box LeafTwoNode(55),
-                ),
-                box TwoNode(70,
-                    box LeafTwoNode(68),
-                    box LeafThreeNode(75, 100),
-                ),
-            )
+            TwoNode(Two(60,
+                box TwoNode(Two(52,
+                    box LeafTwoNode(LeafTwo(50)),
+                    box LeafTwoNode(LeafTwo(55)),
+                )),
+                box TwoNode(Two(70,
+                    box LeafTwoNode(LeafTwo(68)),
+                    box LeafThreeNode(LeafThree(75, 100)),
+                )),
+            ))
         )} => (),
         _ => fail!(),
     }
