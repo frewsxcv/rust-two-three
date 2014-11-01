@@ -104,8 +104,6 @@ pub enum Node<V: Ord> {
 
 
 impl <V: Ord> Node<V> {
-    // PRIVATE
-
     fn next_direction(&self, to_insert: &V) -> Direction {
         match self {
             &TwoNode(Two(ref value, _, _)) =>
