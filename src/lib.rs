@@ -20,25 +20,27 @@ impl <V: ToString+Ord> Four<V> {
     }
 
     /// Convert a Split into a TwoNode with the middle value as the value of the new parent node
-    fn to_two_node(self) -> Node<V> {
+    fn to_two(self) -> Two<V> {
         match self {
             Four(v1, v2, v3, None) =>
-                TwoNode(Two(v2,
+                Two(v2,
                     box LeafTwoNode(LeafTwo(v1)),
-                    box LeafTwoNode(LeafTwo(v3)))),
+                    box LeafTwoNode(LeafTwo(v3))),
             Four(v1, v2, v3, Some((n1, n2, n3, n4))) =>
-                TwoNode(Two(v2,
+                Two(v2,
                     box TwoNode(Two(v1, n1, n2)),
-                    box TwoNode(Two(v3, n3, n4)))),
+                    box TwoNode(Two(v3, n3, n4))),
         }
     }
 }
+
 
 /// InsertResult
 enum InsertResult<V: ToString+Ord> {
     Fit(Node<V>),  // box this node?
     Split(Four<V>),  // split should always contain a ThreeNode/LeafThreeNode. box this?
 }
+
 
 /// Direction
 enum Direction {
@@ -48,13 +50,60 @@ enum Direction {
     Leaf,
 }
 
-/// Node
 
-pub struct LeafTwo<V: ToString+Ord>(pub V);
+/// ToNode
+trait ToNode<V: ToString+Ord> {
+    fn to_node(self) -> Node<V>;
+}
+
+
+/// Two
 pub struct Two<V: ToString+Ord>(pub V, pub Box<Node<V>>, pub Box<Node<V>>);
-pub struct LeafThree<V: ToString+Ord>(pub V, pub V);
+
+impl <V: ToString+Ord> Two<V> {
+    fn to_three(self, other_value: V, other_node: Box<Node<V>>) -> Three<V> {
+        let Two(self_value, self_left, self_middle) = self;
+        if self_value > other_value {
+            Three(other_value, self_value, other_node, self_left, self_middle)
+        } else {
+            Three(self_value, other_value, self_left, self_middle, other_node)
+        }
+    }
+}
+
+impl <V: ToString+Ord> ToNode<V> for Two<V> {
+    fn to_node(self) -> Node<V> { TwoNode(self) }
+}
+
+
+/// Three
 pub struct Three<V: ToString+Ord>(pub V, pub V, pub Box<Node<V>>, pub Box<Node<V>>, pub Box<Node<V>>);
 
+impl <V: ToString+Ord> Three<V> {
+    fn to_four(self, other_value: V, other_node: Box<Node<V>>) -> Four<V> {
+        let Three(self_value1, self_value2, self_left, self_middle, self_right) = self;
+        if other_value < self_value1 {
+            Four(other_value, self_value1, self_value2, Some((other_node, self_left, self_middle, self_right)))
+        } else {
+            Four(self_value1, self_value2, other_value, Some((self_left, self_middle, self_right, other_node)))
+        }
+    }
+}
+
+impl <V: ToString+Ord> ToNode<V> for Three<V> {
+    fn to_node(self) -> Node<V> { ThreeNode(self) }
+}
+
+
+/// LeafTwo
+pub struct LeafTwo<V: ToString+Ord>(pub V);
+
+
+/// LeafThree
+pub struct LeafThree<V: ToString+Ord>(pub V, pub V);
+
+
+/// Node
 pub enum Node<V: ToString+Ord> {
     LeafTwoNode(LeafTwo<V>),
     LeafThreeNode(LeafThree<V>),
@@ -73,34 +122,10 @@ impl <V: ToString+Ord> ToString for Node<V> {
     }
 }
 
+
+
 impl <V: ToString+Ord> Node<V> {
     // PRIVATE
-    /// Extend this TwoNode with the provided value and child node to make it a ThreeNode
-    fn extend(self, other_value: V, other_node: Box<Node<V>>) -> Node<V> {
-        match self {
-            TwoNode(Two(self_value, self_left, self_middle)) => {
-                if self_value > other_value {
-                    ThreeNode(Three(other_value, self_value, other_node, self_left, self_middle))
-                } else {
-                    ThreeNode(Three(self_value, other_value, self_left, self_middle, other_node))
-                }
-            }
-            _ => fail!(""),
-        }
-    }
-
-    fn extend4(self, other_value: V, other_node: Box<Node<V>>) -> Four<V> {
-        match self {
-            ThreeNode(Three(self_value1, self_value2, self_left, self_middle, self_right)) => {
-                if other_value < self_value1 {
-                    Four(other_value, self_value1, self_value2, Some((other_node, self_left, self_middle, self_right)))
-                } else {
-                    Four(self_value1, self_value2, other_value, Some((self_left, self_middle, self_right, other_node)))
-                }
-            }
-            _ => fail!(""),
-        }
-    }
 
     fn next_direction(&self, to_insert: &V) -> Direction {
         match self {
@@ -166,11 +191,11 @@ impl <V: ToString+Ord> Node<V> {
                 let new_node = match insert_result {
                     Fit(returned_node) =>
                         match next_direction {
-                            Left => TwoNode(Two(value, box returned_node, box other_node)),
-                            Middle => TwoNode(Two(value, box other_node, box returned_node)),
+                            Left => Two(value, box returned_node, box other_node).to_node(),
+                            Middle => Two(value, box other_node, box returned_node).to_node(),
                             _ => fail!(""),
                         },
-                    Split(four_node) => four_node.to_two_node().extend(value, box other_node),
+                    Split(four_node) => four_node.to_two().to_three(value, box other_node).to_node(),
                 };
 
                 Fit(new_node)
@@ -201,9 +226,9 @@ impl <V: ToString+Ord> Node<V> {
                     },
                     Split(four_node) => {
                         let new_node: Four<V> = match next_direction {
-                            Left => four_node.to_two_node().extend(value1, other_node1).extend4(value2, other_node2),
-                            Middle => four_node.to_two_node().extend(value1, other_node1).extend4(value2, other_node2),
-                            Right => four_node.to_two_node().extend(value2, other_node2).extend4(value1, other_node1),
+                            Left => four_node.to_two().to_three(value1, other_node1).to_four(value2, other_node2),
+                            Middle => four_node.to_two().to_three(value1, other_node1).to_four(value2, other_node2),
+                            Right => four_node.to_two().to_three(value2, other_node2).to_four(value1, other_node1),
                             _ => fail!(""),
                         };
                         Split(new_node)
@@ -242,7 +267,7 @@ impl <V: ToString+Ord> TTTree<V> {
                 let result = root.insert(value);
                 match result {
                     Fit(node) => node,
-                    Split(node @ Four(..)) => node.to_two_node(),
+                    Split(node @ Four(..)) => node.to_two().to_node(),
                 }
             }
         };
