@@ -1,6 +1,11 @@
 // Many of my decisions were based off the following document
 // https://web.archive.org/web/20140727185616/http://algs4.cs.princeton.edu/33balanced/
 
+
+// TODO:
+// Collection trait
+// convert this to Key/Value K/V
+
 use std::cmp::Ord;
 use std::option::{None, Option, Some};
 
@@ -243,8 +248,3 @@ impl <V: Ord> TTTree<V> {
         self.root = Some(new_root);
     }
 }
-
-
-// TODO:
-// Collection trait
-// convert this to Key/Value K/V
