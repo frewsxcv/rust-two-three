@@ -207,13 +207,13 @@ impl <V: ToString+Ord> Node<V> {
 
                 match insert_result {
                     Fit(returned_node) => {
-                        let new_node = match next_direction {
-                            Left => ThreeNode(Three(value1, value2, box returned_node, other_node1, other_node2)),
-                            Middle => ThreeNode(Three(value1, value2, other_node1, box returned_node, other_node2)),
-                            Right => ThreeNode(Three(value1, value2, other_node1, other_node2, box returned_node)),
+                        let three = match next_direction {
+                            Left => Three(value1, value2, box returned_node, other_node1, other_node2),
+                            Middle => Three(value1, value2, other_node1, box returned_node, other_node2),
+                            Right => Three(value1, value2, other_node1, other_node2, box returned_node),
                             _ => fail!(""),
                         };
-                        Fit(new_node)
+                        Fit(three.to_node())
                     },
                     Split(four_node) => {
                         let new_node: Four<V> = match next_direction {
