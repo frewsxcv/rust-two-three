@@ -3,13 +3,12 @@
 
 use std::cmp::Ord;
 use std::option::{None, Option, Some};
-use std::to_string::ToString;
 
 
 /// Four
-struct Four<V: ToString+Ord>(V, V, V, Option<(Box<Node<V>>, Box<Node<V>>, Box<Node<V>>, Box<Node<V>>)>);
+struct Four<V: Ord>(V, V, V, Option<(Box<Node<V>>, Box<Node<V>>, Box<Node<V>>, Box<Node<V>>)>);
 
-impl <V: ToString+Ord> Four<V> {
+impl <V: Ord> Four<V> {
 
     /// Convert a Split into a TwoNode with the middle value as the value of the new parent node
     fn to_two(self) -> Two<V> {
@@ -28,7 +27,7 @@ impl <V: ToString+Ord> Four<V> {
 
 
 /// InsertResult
-enum InsertResult<V: ToString+Ord> {
+enum InsertResult<V: Ord> {
     Fit(Node<V>),  // box this node?
     Split(Four<V>),  // split should always contain a ThreeNode/LeafThreeNode. box this?
 }
@@ -44,9 +43,9 @@ enum Direction {
 
 
 /// Two
-pub struct Two<V: ToString+Ord>(pub V, pub Box<Node<V>>, pub Box<Node<V>>);
+pub struct Two<V: Ord>(pub V, pub Box<Node<V>>, pub Box<Node<V>>);
 
-impl <V: ToString+Ord> Two<V> {
+impl <V: Ord> Two<V> {
     fn to_node(self) -> Node<V> { TwoNode(self) }
 
     fn to_three(self, other_value: V, other_node: Box<Node<V>>) -> Three<V> {
@@ -61,9 +60,9 @@ impl <V: ToString+Ord> Two<V> {
 
 
 /// Three
-pub struct Three<V: ToString+Ord>(pub V, pub V, pub Box<Node<V>>, pub Box<Node<V>>, pub Box<Node<V>>);
+pub struct Three<V: Ord>(pub V, pub V, pub Box<Node<V>>, pub Box<Node<V>>, pub Box<Node<V>>);
 
-impl <V: ToString+Ord> Three<V> {
+impl <V: Ord> Three<V> {
     fn to_node(self) -> Node<V> { ThreeNode(self) }
 
     fn to_four(self, other_value: V, other_node: Box<Node<V>>) -> Four<V> {
@@ -78,13 +77,13 @@ impl <V: ToString+Ord> Three<V> {
 
 
 /// LeafTwo
-pub struct LeafTwo<V: ToString+Ord>(pub V);
+pub struct LeafTwo<V: Ord>(pub V);
 
 
 /// LeafThree
-pub struct LeafThree<V: ToString+Ord>(pub V, pub V);
+pub struct LeafThree<V: Ord>(pub V, pub V);
 
-impl <V: ToString+Ord> LeafThree<V> {
+impl <V: Ord> LeafThree<V> {
     fn to_four(self, value: V) -> Four<V> {
         let LeafThree(value1, value2) = self;
         if value > value2      { Four(value1, value2, value, None) }
@@ -95,27 +94,16 @@ impl <V: ToString+Ord> LeafThree<V> {
 
 
 /// Node
-pub enum Node<V: ToString+Ord> {
+pub enum Node<V: Ord> {
     LeafTwoNode(LeafTwo<V>),
     LeafThreeNode(LeafThree<V>),
     TwoNode(Two<V>),
     ThreeNode(Three<V>),
 }
 
-impl <V: ToString+Ord> ToString for Node<V> {
-    fn to_string(&self) -> String {
-        match *self {
-            LeafTwoNode(LeafTwo(ref v)) => format!("LeafTwoNode({:s})", v.to_string()),
-            LeafThreeNode(LeafThree(ref v1, ref v2)) => format!("LeafThreeNode({:s}, {:s})", v1.to_string(), v2.to_string()),
-            TwoNode(Two(ref v, ref left, ref middle)) => format!("TwoNode({:s}, {:s}, {:s})", v.to_string(), left.to_string(), middle.to_string()),
-            ThreeNode(Three(_, _, ref left, ref middle, ref right)) => format!("ThreeNode({:s}, {:s}, {:s})", left.to_string(), middle.to_string(), right.to_string()),
-        }
-    }
-}
 
 
-
-impl <V: ToString+Ord> Node<V> {
+impl <V: Ord> Node<V> {
     // PRIVATE
 
     fn next_direction(&self, to_insert: &V) -> Direction {
@@ -182,10 +170,10 @@ impl <V: ToString+Ord> Node<V> {
                 let new_node = match insert_result {
                     Fit(returned_node) =>
                         match next_direction {
-                            Left => Two(value, box returned_node, box other_node).to_node(),
-                            Middle => Two(value, box other_node, box returned_node).to_node(),
+                            Left =>   Two(value, box returned_node, box other_node),
+                            Middle => Two(value, box other_node, box returned_node),
                             _ => fail!(""),
-                        },
+                        }.to_node(),
                     Split(four_node) => four_node.to_two().to_three(value, box other_node).to_node(),
                 };
 
@@ -233,20 +221,11 @@ impl <V: ToString+Ord> Node<V> {
 
 
 /// TTTree
-pub struct TTTree<V: ToString+Ord> {
+pub struct TTTree<V: Ord> {
     pub root: Option<Node<V>>,
 }
 
-impl <V: ToString+Ord> ToString for TTTree<V> {
-    fn to_string(&self) -> String {
-        match self.root {
-            Some(ref node) => node.to_string(),
-            None => "TTTree(<empty>)".to_string(),
-        }
-    }
-}
-
-impl <V: ToString+Ord> TTTree<V> {
+impl <V: Ord> TTTree<V> {
     pub fn new() -> TTTree<V> {
         TTTree { root: None }
     }
@@ -271,4 +250,3 @@ impl <V: ToString+Ord> TTTree<V> {
 // TODO:
 // Collection trait
 // convert this to Key/Value K/V
-// remove ToString debugging stuffs
