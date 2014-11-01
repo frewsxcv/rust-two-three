@@ -216,10 +216,11 @@ impl <V: ToString+Ord> Node<V> {
                         Fit(three.to_node())
                     },
                     Split(four_node) => {
+                        let two = four_node.to_two();
                         let new_node: Four<V> = match next_direction {
-                            Left =>   four_node.to_two().to_three(value1, other_node1).to_four(value2, other_node2),
-                            Middle => four_node.to_two().to_three(value1, other_node1).to_four(value2, other_node2),
-                            Right =>  four_node.to_two().to_three(value2, other_node2).to_four(value1, other_node1),
+                            Left =>   two.to_three(value1, other_node1).to_four(value2, other_node2),
+                            Middle => two.to_three(value1, other_node1).to_four(value2, other_node2),
+                            Right =>  two.to_three(value2, other_node2).to_four(value1, other_node1),
                             _ => fail!(""),
                         };
                         Split(new_node)
