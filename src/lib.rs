@@ -6,18 +6,19 @@ use std::option::{None, Option, Some};
 
 
 /// Four
-struct Four<V: Ord>(V, V, V, Option<(Box<Node<V>>, Box<Node<V>>, Box<Node<V>>, Box<Node<V>>)>);
+enum Four<V: Ord> {
+    InternalFour(V, V, V, Box<Node<V>>, Box<Node<V>>, Box<Node<V>>, Box<Node<V>>),
+    LeafFour(V, V, V),
+}
 
 impl <V: Ord> Four<V> {
-
-    /// Convert a Split into a TwoNode with the middle value as the value of the new parent node
     fn to_two(self) -> Two<V> {
         match self {
-            Four(v1, v2, v3, None) =>
+            LeafFour(v1, v2, v3) =>
                 Two(v2,
                     box LeafTwoNode(LeafTwo(v1)),
                     box LeafTwoNode(LeafTwo(v3))),
-            Four(v1, v2, v3, Some((n1, n2, n3, n4))) =>
+            InternalFour(v1, v2, v3, n1, n2, n3, n4) =>
                 Two(v2,
                     box TwoNode(Two(v1, n1, n2)),
                     box TwoNode(Two(v3, n3, n4))),
@@ -28,8 +29,8 @@ impl <V: Ord> Four<V> {
 
 /// InsertResult
 enum InsertResult<V: Ord> {
-    Fit(Node<V>),  // box this node?
-    Split(Four<V>),  // split should always contain a ThreeNode/LeafThreeNode. box this?
+    Fit(Node<V>),
+    Split(Four<V>),
 }
 
 
@@ -68,9 +69,9 @@ impl <V: Ord> Three<V> {
     fn to_four(self, other_value: V, other_node: Box<Node<V>>) -> Four<V> {
         let Three(self_value1, self_value2, self_left, self_middle, self_right) = self;
         if other_value < self_value1 {
-            Four(other_value, self_value1, self_value2, Some((other_node, self_left, self_middle, self_right)))
+            InternalFour(other_value, self_value1, self_value2, other_node, self_left, self_middle, self_right)
         } else {
-            Four(self_value1, self_value2, other_value, Some((self_left, self_middle, self_right, other_node)))
+            InternalFour(self_value1, self_value2, other_value, self_left, self_middle, self_right, other_node)
         }
     }
 }
@@ -86,9 +87,9 @@ pub struct LeafThree<V: Ord>(pub V, pub V);
 impl <V: Ord> LeafThree<V> {
     fn to_four(self, value: V) -> Four<V> {
         let LeafThree(value1, value2) = self;
-        if value > value2      { Four(value1, value2, value, None) }
-        else if value < value1 { Four(value, value1, value2, None) }
-        else                   { Four(value1, value, value2, None) }
+        if value > value2      { LeafFour(value1, value2, value) }
+        else if value < value1 { LeafFour(value, value1, value2) }
+        else                   { LeafFour(value1, value, value2) }
     }
 }
 
@@ -100,7 +101,6 @@ pub enum Node<V: Ord> {
     TwoNode(Two<V>),
     ThreeNode(Three<V>),
 }
-
 
 
 impl <V: Ord> Node<V> {
@@ -205,7 +205,7 @@ impl <V: Ord> Node<V> {
                     },
                     Split(four_node) => {
                         let two = four_node.to_two();
-                        let new_node: Four<V> = match next_direction {
+                        let new_node = match next_direction {
                             Left =>   two.to_three(value1, other_node1).to_four(value2, other_node2),
                             Middle => two.to_three(value1, other_node1).to_four(value2, other_node2),
                             Right =>  two.to_three(value2, other_node2).to_four(value1, other_node1),
@@ -238,7 +238,7 @@ impl <V: Ord> TTTree<V> {
                 let result = root.insert(value);
                 match result {
                     Fit(node) => node,
-                    Split(node @ Four(..)) => node.to_two().to_node(),
+                    Split(four_node) => four_node.to_two().to_node(),
                 }
             }
         };
