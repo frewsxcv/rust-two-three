@@ -10,19 +10,19 @@ fn it_works() {
     tree.insert(50);
     match tree {
         TTTree{root: Some(LeafTwoNode(LeafTwo(50)))} => (),
-        _ => fail!(),
+        _ => panic!(),
     }
 
     tree.insert(50);
     match tree {
         TTTree{root: Some(LeafTwoNode(LeafTwo(50)))} => (),
-        _ => fail!(),
+        _ => panic!(),
     }
 
     tree.insert(60);
     match tree {
         TTTree{root: Some(LeafThreeNode(LeafThree(50, 60)))} => (),
-        _ => fail!(),
+        _ => panic!(),
     }
 
     tree.insert(70);
@@ -33,7 +33,7 @@ fn it_works() {
                 box LeafTwoNode(LeafTwo(70))
             ))
         )} => (),
-        _ => fail!(),
+        _ => panic!(),
     }
 
     tree.insert(100);
@@ -44,7 +44,7 @@ fn it_works() {
                 box LeafThreeNode(LeafThree(70, 100))
             ))
         )} => (),
-        _ => fail!(),
+        _ => panic!(),
     }
 
     tree.insert(55);
@@ -55,7 +55,7 @@ fn it_works() {
                 box LeafThreeNode(LeafThree(70, 100))
             ))
         )} => (),
-        _ => fail!(),
+        _ => panic!(),
     }
 
     tree.insert(68);
@@ -67,7 +67,7 @@ fn it_works() {
                 box LeafTwoNode(LeafTwo(100))
             ))
         )} => (),
-        _ => fail!(),
+        _ => panic!(),
     }
 
     tree.insert(75);
@@ -79,7 +79,7 @@ fn it_works() {
                 box LeafThreeNode(LeafThree(75, 100))
             ))
         )} => (),
-        _ => fail!(),
+        _ => panic!(),
     }
 
     tree.insert(52);
@@ -96,6 +96,6 @@ fn it_works() {
                 )),
             ))
         )} => (),
-        _ => fail!(),
+        _ => panic!(),
     }
 }
