@@ -11,14 +11,6 @@ struct Four<V: ToString+Ord>(V, V, V, Option<(Box<Node<V>>, Box<Node<V>>, Box<No
 
 impl <V: ToString+Ord> Four<V> {
 
-    fn from_leaf_3node_and_value(node: LeafThree<V>, value: V) -> Four<V> {
-        let LeafThree(value1, value2) = node;
-
-        if value > value2      { Four(value1, value2, value, None) }
-        else if value < value1 { Four(value, value1, value2, None) }
-        else                   { Four(value1, value, value2, None) }
-    }
-
     /// Convert a Split into a TwoNode with the middle value as the value of the new parent node
     fn to_two(self) -> Two<V> {
         match self {
@@ -92,6 +84,15 @@ pub struct LeafTwo<V: ToString+Ord>(pub V);
 /// LeafThree
 pub struct LeafThree<V: ToString+Ord>(pub V, pub V);
 
+impl <V: ToString+Ord> LeafThree<V> {
+    fn to_four(self, value: V) -> Four<V> {
+        let LeafThree(value1, value2) = self;
+        if value > value2      { Four(value1, value2, value, None) }
+        else if value < value1 { Four(value, value1, value2, None) }
+        else                   { Four(value1, value, value2, None) }
+    }
+}
+
 
 /// Node
 pub enum Node<V: ToString+Ord> {
@@ -160,7 +161,7 @@ impl <V: ToString+Ord> Node<V> {
 
             // Split if leaf ThreeNode
             LeafThreeNode(leaf_three) => {
-                let four_node = Four::from_leaf_3node_and_value(leaf_three, to_insert);
+                let four_node = leaf_three.to_four(to_insert);
                 Split(four_node)
             },
 
