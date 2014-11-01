@@ -208,18 +208,18 @@ impl <V: ToString+Ord> Node<V> {
                 match insert_result {
                     Fit(returned_node) => {
                         let three = match next_direction {
-                            Left => Three(value1, value2, box returned_node, other_node1, other_node2),
+                            Left =>   Three(value1, value2, box returned_node, other_node1, other_node2),
                             Middle => Three(value1, value2, other_node1, box returned_node, other_node2),
-                            Right => Three(value1, value2, other_node1, other_node2, box returned_node),
+                            Right =>  Three(value1, value2, other_node1, other_node2, box returned_node),
                             _ => fail!(""),
                         };
                         Fit(three.to_node())
                     },
                     Split(four_node) => {
                         let new_node: Four<V> = match next_direction {
-                            Left => four_node.to_two().to_three(value1, other_node1).to_four(value2, other_node2),
+                            Left =>   four_node.to_two().to_three(value1, other_node1).to_four(value2, other_node2),
                             Middle => four_node.to_two().to_three(value1, other_node1).to_four(value2, other_node2),
-                            Right => four_node.to_two().to_three(value2, other_node2).to_four(value1, other_node1),
+                            Right =>  four_node.to_two().to_three(value2, other_node2).to_four(value1, other_node1),
                             _ => fail!(""),
                         };
                         Split(new_node)
