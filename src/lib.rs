@@ -52,7 +52,7 @@ enum Direction {
 pub struct Two<V: Ord>(pub V, pub Box<Node<V>>, pub Box<Node<V>>);
 
 impl <V: Ord> Two<V> {
-    fn to_node(self) -> Node<V> { TwoNode(self) }
+    fn as_node(self) -> Node<V> { TwoNode(self) }
 
     fn to_three(self, other_value: V, other_node: Box<Node<V>>) -> Three<V> {
         let Two(self_value, self_left, self_middle) = self;
@@ -69,7 +69,7 @@ impl <V: Ord> Two<V> {
 pub struct Three<V: Ord>(pub V, pub V, pub Box<Node<V>>, pub Box<Node<V>>, pub Box<Node<V>>);
 
 impl <V: Ord> Three<V> {
-    fn to_node(self) -> Node<V> { ThreeNode(self) }
+    fn as_node(self) -> Node<V> { ThreeNode(self) }
 
     fn to_four(self, other_value: V, other_node: Box<Node<V>>) -> Four<V> {
         let Three(self_value1, self_value2, self_left, self_middle, self_right) = self;
@@ -101,7 +101,7 @@ impl <V: Ord> LeafTwo<V> {
 pub struct LeafThree<V: Ord>(pub V, pub V);
 
 impl <V: Ord> LeafThree<V> {
-    fn to_node(self) -> Node<V> { LeafThreeNode(self) }
+    fn as_node(self) -> Node<V> { LeafThreeNode(self) }
 
     fn to_four(self, value: V) -> Four<V> {
         let LeafThree(value1, value2) = self;
@@ -157,7 +157,7 @@ impl <V: Ord> Node<V> {
             // Insert if leaf TwoNode
             LeafTwoNode(leaf_two) => {
                 let three_node = leaf_two.to_three(to_insert);
-                Fit(three_node.to_node())
+                Fit(three_node.as_node())
             },
 
             // Split if leaf ThreeNode
@@ -186,8 +186,8 @@ impl <V: Ord> Node<V> {
                             Left =>   Two(value, box returned_node, box other_node),
                             Middle => Two(value, box other_node, box returned_node),
                             _ => panic!(""),
-                        }.to_node(),
-                    Split(four_node) => four_node.to_two().to_three(value, box other_node).to_node(),
+                        }.as_node(),
+                    Split(four_node) => four_node.to_two().to_three(value, box other_node).as_node(),
                 };
 
                 Fit(new_node)
@@ -214,7 +214,7 @@ impl <V: Ord> Node<V> {
                             Right =>  Three(value1, value2, other_node1, other_node2, box returned_node),
                             _ => panic!(""),
                         };
-                        Fit(three.to_node())
+                        Fit(three.as_node())
                     },
                     Split(four_node) => {
                         let two = four_node.to_two();
@@ -251,7 +251,7 @@ impl <V: Ord> TTTree<V> {
                 let result = root.insert(value);
                 match result {
                     Fit(node) => node,
-                    Split(four_node) => four_node.to_two().to_node(),
+                    Split(four_node) => four_node.to_two().as_node(),
                 }
             }
         };
