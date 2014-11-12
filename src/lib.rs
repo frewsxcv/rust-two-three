@@ -85,11 +85,24 @@ impl <V: Ord> Three<V> {
 /// LeafTwo
 pub struct LeafTwo<V: Ord>(pub V);
 
+impl <V: Ord> LeafTwo<V> {
+    fn to_three(self, other_value: V) -> LeafThree<V> {
+        let LeafTwo(self_value) = self;
+        if self_value > other_value {
+            LeafThree(other_value, self_value)
+        } else {
+            LeafThree(self_value, other_value)
+        }
+    }
+}
+
 
 /// LeafThree
 pub struct LeafThree<V: Ord>(pub V, pub V);
 
 impl <V: Ord> LeafThree<V> {
+    fn to_node(self) -> Node<V> { LeafThreeNode(self) }
+
     fn to_four(self, value: V) -> Four<V> {
         let LeafThree(value1, value2) = self;
         if value > value2      { LeafFour(value1, value2, value) }
@@ -142,12 +155,9 @@ impl <V: Ord> Node<V> {
 
         match self {
             // Insert if leaf TwoNode
-            LeafTwoNode(LeafTwo(value)) => {
-                let (smaller, larger) =
-                    if value < to_insert { (value, to_insert) }
-                    else                 { (to_insert, value) };
-                let new_node = LeafThreeNode(LeafThree(smaller, larger));
-                Fit(new_node)
+            LeafTwoNode(leaf_two) => {
+                let three_node = leaf_two.to_three(to_insert);
+                Fit(three_node.to_node())
             },
 
             // Split if leaf ThreeNode
