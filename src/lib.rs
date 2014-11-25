@@ -9,24 +9,27 @@
 use std::cmp::Ord;
 use std::option::{None, Option, Some};
 
+use Direction::{Left, Middle, Right, Leaf};
+use InsertResult::{Fit, Split};
+
 
 /// Four
-enum Four<V: Ord> {
-    InternalFour(V, V, V, Box<Node<V>>, Box<Node<V>>, Box<Node<V>>, Box<Node<V>>),
+enum SplitNode<V: Ord> {
+    Four(V, V, V, Box<Node<V>>, Box<Node<V>>, Box<Node<V>>, Box<Node<V>>),
     LeafFour(V, V, V),
 }
 
-impl <V: Ord> Four<V> {
+impl <V: Ord> SplitNode<V> {
     fn to_two(self) -> Two<V> {
         match self {
-            LeafFour(v1, v2, v3) =>
+            SplitNode::LeafFour(v1, v2, v3) =>
                 Two(v2,
-                    box LeafTwoNode(LeafTwo(v1)),
-                    box LeafTwoNode(LeafTwo(v3))),
-            InternalFour(v1, v2, v3, n1, n2, n3, n4) =>
+                    box Node::LeafTwo(LeafTwo(v1)),
+                    box Node::LeafTwo(LeafTwo(v3))),
+            SplitNode::Four(v1, v2, v3, n1, n2, n3, n4) =>
                 Two(v2,
-                    box TwoNode(Two(v1, n1, n2)),
-                    box TwoNode(Two(v3, n3, n4))),
+                    box Node::Two(Two(v1, n1, n2)),
+                    box Node::Two(Two(v3, n3, n4))),
         }
     }
 }
@@ -35,7 +38,7 @@ impl <V: Ord> Four<V> {
 /// InsertResult
 enum InsertResult<V: Ord> {
     Fit(Node<V>),
-    Split(Four<V>),
+    Split(SplitNode<V>),
 }
 
 
@@ -52,7 +55,7 @@ enum Direction {
 pub struct Two<V: Ord>(pub V, pub Box<Node<V>>, pub Box<Node<V>>);
 
 impl <V: Ord> Two<V> {
-    fn as_node(self) -> Node<V> { TwoNode(self) }
+    fn as_node(self) -> Node<V> { Node::Two(self) }
 
     fn to_three(self, other_value: V, other_node: Box<Node<V>>) -> Three<V> {
         let Two(self_value, self_left, self_middle) = self;
@@ -69,14 +72,14 @@ impl <V: Ord> Two<V> {
 pub struct Three<V: Ord>(pub V, pub V, pub Box<Node<V>>, pub Box<Node<V>>, pub Box<Node<V>>);
 
 impl <V: Ord> Three<V> {
-    fn as_node(self) -> Node<V> { ThreeNode(self) }
+    fn as_node(self) -> Node<V> { Node::Three(self) }
 
-    fn to_four(self, other_value: V, other_node: Box<Node<V>>) -> Four<V> {
+    fn to_four(self, other_value: V, other_node: Box<Node<V>>) -> SplitNode<V> {
         let Three(self_value1, self_value2, self_left, self_middle, self_right) = self;
         if other_value < self_value1 {
-            InternalFour(other_value, self_value1, self_value2, other_node, self_left, self_middle, self_right)
+            SplitNode::Four(other_value, self_value1, self_value2, other_node, self_left, self_middle, self_right)
         } else {
-            InternalFour(self_value1, self_value2, other_value, self_left, self_middle, self_right, other_node)
+            SplitNode::Four(self_value1, self_value2, other_value, self_left, self_middle, self_right, other_node)
         }
     }
 }
@@ -101,33 +104,33 @@ impl <V: Ord> LeafTwo<V> {
 pub struct LeafThree<V: Ord>(pub V, pub V);
 
 impl <V: Ord> LeafThree<V> {
-    fn as_node(self) -> Node<V> { LeafThreeNode(self) }
+    fn as_node(self) -> Node<V> { Node::LeafThree(self) }
 
-    fn to_four(self, value: V) -> Four<V> {
+    fn to_four(self, value: V) -> SplitNode<V> {
         let LeafThree(value1, value2) = self;
-        if value > value2      { LeafFour(value1, value2, value) }
-        else if value < value1 { LeafFour(value, value1, value2) }
-        else                   { LeafFour(value1, value, value2) }
+        if value > value2      { SplitNode::LeafFour(value1, value2, value) }
+        else if value < value1 { SplitNode::LeafFour(value, value1, value2) }
+        else                   { SplitNode::LeafFour(value1, value, value2) }
     }
 }
 
 
 /// Node
 pub enum Node<V: Ord> {
-    LeafTwoNode(LeafTwo<V>),
-    LeafThreeNode(LeafThree<V>),
-    TwoNode(Two<V>),
-    ThreeNode(Three<V>),
+    LeafTwo(LeafTwo<V>),
+    LeafThree(LeafThree<V>),
+    Two(Two<V>),
+    Three(Three<V>),
 }
 
 
 impl <V: Ord> Node<V> {
     fn next_direction(&self, to_insert: &V) -> Direction {
         match self {
-            &TwoNode(Two(ref value, _, _)) =>
+            &Node::Two(Two(ref value, _, _)) =>
                 if to_insert < value { Left }
                 else                 { Middle },
-            &ThreeNode(Three(ref value1, ref value2, _, _, _)) =>
+            &Node::Three(Three(ref value1, ref value2, _, _, _)) =>
                 if      to_insert < value1 { Left }
                 else if to_insert > value2 { Right }
                 else                       { Middle },
@@ -137,11 +140,11 @@ impl <V: Ord> Node<V> {
 
     fn contains_node(&self, to_check: &V) -> bool {
         match self {
-            &TwoNode(Two(ref v, _, _)) |
-                &LeafTwoNode(LeafTwo(ref v)) if to_check == v => true,
+            &Node::Two(Two(ref v, _, _)) |
+                &Node::LeafTwo(LeafTwo(ref v)) if to_check == v => true,
 
-            &ThreeNode(Three(ref v1, ref v2, _, _, _)) |
-                &LeafThreeNode(LeafThree(ref v1, ref v2)) if to_check == v1 || to_check == v2 => true,
+            &Node::Three(Three(ref v1, ref v2, _, _, _)) |
+                &Node::LeafThree(LeafThree(ref v1, ref v2)) if to_check == v1 || to_check == v2 => true,
 
             _ => false
         }
@@ -155,19 +158,19 @@ impl <V: Ord> Node<V> {
 
         match self {
             // Insert if leaf TwoNode
-            LeafTwoNode(leaf_two) => {
+            Node::LeafTwo(leaf_two) => {
                 let three_node = leaf_two.to_three(to_insert);
                 Fit(three_node.as_node())
             },
 
             // Split if leaf ThreeNode
-            LeafThreeNode(leaf_three) => {
+            Node::LeafThree(leaf_three) => {
                 let four_node = leaf_three.to_four(to_insert);
                 Split(four_node)
             },
 
             // Recurse down if internal Node and handle results
-            TwoNode(Two(value, box left, box middle)) => {
+            Node::Two(Two(value, box left, box middle)) => {
 
                 // Determine which node we'll recurse next
                 let (next_node, other_node) = match next_direction {
@@ -194,7 +197,7 @@ impl <V: Ord> Node<V> {
             },
 
             // Recurse down if internal Node and handle results
-            ThreeNode(Three(value1, value2, left, middle, right)) => {
+            Node::Three(Three(value1, value2, left, middle, right)) => {
 
                 // Determine which node we'll recurse next
                 let (next_node, other_node1, other_node2) = match next_direction {
@@ -246,7 +249,7 @@ impl <V: Ord> TTTree<V> {
     pub fn insert(&mut self, value: V) -> () {
         let root: Option<Node<V>> = self.root.take();
         let new_root: Node<V> = match root {
-            None => LeafTwoNode(LeafTwo(value)),
+            None => Node::LeafTwo(LeafTwo(value)),
             Some(root) => {
                 let result = root.insert(value);
                 match result {
