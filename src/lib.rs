@@ -6,9 +6,6 @@
 // Collection trait
 // convert this to Key/Value K/V
 
-use std::cmp::Ord;
-use std::option::{None, Option, Some};
-
 use Direction::{Left, Middle, Right, Leaf};
 use InsertResult::{Fit, Split};
 
