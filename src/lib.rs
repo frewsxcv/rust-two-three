@@ -62,6 +62,11 @@ impl <V: Ord> Two<V> {
             Three(self_value, other_value, self_left, self_middle, other_node)
         }
     }
+
+    fn has_value(&self, value: &V) -> bool {
+        let &Two(ref self_value, _, _) = self;
+        *self_value == *value
+    }
 }
 
 
@@ -79,6 +84,11 @@ impl <V: Ord> Three<V> {
             SplitNode::Four(self_value1, self_value2, other_value, self_left, self_middle, self_right, other_node)
         }
     }
+
+    fn has_value(&self, value: &V) -> bool {
+        let &Three(ref self_value1, ref self_value2, _, _, _) = self;
+        *self_value1 == *value || *self_value2 == *value
+    }
 }
 
 
@@ -94,6 +104,11 @@ impl <V: Ord> LeafTwo<V> {
             LeafThree(self_value, other_value)
         }
     }
+
+    fn has_value(&self, value: &V) -> bool {
+        let &LeafTwo(ref self_value) = self;
+        *self_value == *value
+    }
 }
 
 
@@ -108,6 +123,11 @@ impl <V: Ord> LeafThree<V> {
         if value > value2      { SplitNode::LeafFour(value1, value2, value) }
         else if value < value1 { SplitNode::LeafFour(value, value1, value2) }
         else                   { SplitNode::LeafFour(value1, value, value2) }
+    }
+
+    fn has_value(&self, value: &V) -> bool {
+        let &LeafThree(ref self_value1, ref self_value2) = self;
+        *self_value1 == *value || *self_value2 == *value
     }
 }
 
@@ -135,21 +155,18 @@ impl <V: Ord> Node<V> {
         }
     }
 
-    fn contains_node(&self, to_check: &V) -> bool {
+    fn has_value(&self, value: &V) -> bool {
         match self {
-            &Node::Two(Two(ref v, _, _)) |
-                &Node::LeafTwo(LeafTwo(ref v)) if to_check == v => true,
-
-            &Node::Three(Three(ref v1, ref v2, _, _, _)) |
-                &Node::LeafThree(LeafThree(ref v1, ref v2)) if to_check == v1 || to_check == v2 => true,
-
-            _ => false
+            &Node::LeafTwo(ref n)   => n.has_value(value),
+            &Node::LeafThree(ref n) => n.has_value(value),
+            &Node::Two(ref n)       => n.has_value(value),
+            &Node::Three(ref n)     => n.has_value(value),
         }
     }
 
     fn insert(self, to_insert: V) -> InsertResult<V> {
         // If value is already in this node, we're done (prevent duplicates)
-        if self.contains_node(&to_insert) { return Fit(self); }
+        if self.has_value(&to_insert) { return Fit(self); }
 
         let next_direction = self.next_direction(&to_insert);
 
