@@ -10,7 +10,7 @@ use Direction::{Left, Middle, Right, Leaf};
 use InsertResult::{Fit, Split};
 
 
-/// Four
+/// SplitNode
 enum SplitNode<V: Ord> {
     Four(V, V, V, Box<Node<V>>, Box<Node<V>>, Box<Node<V>>, Box<Node<V>>),
     LeafFour(V, V, V),
@@ -162,8 +162,8 @@ impl <V: Ord> Node<V> {
 
             // Split if leaf ThreeNode
             Node::LeafThree(leaf_three) => {
-                let four_node = leaf_three.to_split_node(to_insert);
-                Split(four_node)
+                let split_node = leaf_three.to_split_node(to_insert);
+                Split(split_node)
             },
 
             // Recurse down if internal Node and handle results
@@ -187,7 +187,7 @@ impl <V: Ord> Node<V> {
                             Middle => Two(value, box other_node, box returned_node),
                             _ => panic!(""),
                         }.as_node(),
-                    Split(four_node) => four_node.to_two().to_three(value, box other_node).as_node(),
+                    Split(split_node) => split_node.to_two().to_three(value, box other_node).as_node(),
                 };
 
                 Fit(new_node)
@@ -216,8 +216,8 @@ impl <V: Ord> Node<V> {
                         };
                         Fit(three.as_node())
                     },
-                    Split(four_node) => {
-                        let two = four_node.to_two();
+                    Split(split_node) => {
+                        let two = split_node.to_two();
                         let new_node = match next_direction {
                             Left =>   two.to_three(value1, other_node1).to_split_node(value2, other_node2),
                             Middle => two.to_three(value1, other_node1).to_split_node(value2, other_node2),
@@ -251,7 +251,7 @@ impl <V: Ord> TTTree<V> {
                 let result = root.insert(value);
                 match result {
                     Fit(node) => node,
-                    Split(four_node) => four_node.to_two().as_node(),
+                    Split(split_node) => split_node.to_two().as_node(),
                 }
             }
         };
