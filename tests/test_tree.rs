@@ -1,6 +1,6 @@
-extern crate rust_two_three;
+extern crate two_three;
 
-use rust_two_three::{Node, TTTree, Two, Three, LeafTwo, LeafThree};
+use two_three::{Node, TTTree, Two, Three, LeafTwo, LeafThree};
 
 
 #[test]
