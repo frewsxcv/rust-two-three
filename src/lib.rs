@@ -71,7 +71,7 @@ pub struct Three<V: Ord>(pub V, pub V, pub Box<Node<V>>, pub Box<Node<V>>, pub B
 impl <V: Ord> Three<V> {
     fn as_node(self) -> Node<V> { Node::Three(self) }
 
-    fn to_four(self, other_value: V, other_node: Box<Node<V>>) -> SplitNode<V> {
+    fn to_split_node(self, other_value: V, other_node: Box<Node<V>>) -> SplitNode<V> {
         let Three(self_value1, self_value2, self_left, self_middle, self_right) = self;
         if other_value < self_value1 {
             SplitNode::Four(other_value, self_value1, self_value2, other_node, self_left, self_middle, self_right)
@@ -103,7 +103,7 @@ pub struct LeafThree<V: Ord>(pub V, pub V);
 impl <V: Ord> LeafThree<V> {
     fn as_node(self) -> Node<V> { Node::LeafThree(self) }
 
-    fn to_four(self, value: V) -> SplitNode<V> {
+    fn to_split_node(self, value: V) -> SplitNode<V> {
         let LeafThree(value1, value2) = self;
         if value > value2      { SplitNode::LeafFour(value1, value2, value) }
         else if value < value1 { SplitNode::LeafFour(value, value1, value2) }
@@ -162,7 +162,7 @@ impl <V: Ord> Node<V> {
 
             // Split if leaf ThreeNode
             Node::LeafThree(leaf_three) => {
-                let four_node = leaf_three.to_four(to_insert);
+                let four_node = leaf_three.to_split_node(to_insert);
                 Split(four_node)
             },
 
@@ -219,9 +219,9 @@ impl <V: Ord> Node<V> {
                     Split(four_node) => {
                         let two = four_node.to_two();
                         let new_node = match next_direction {
-                            Left =>   two.to_three(value1, other_node1).to_four(value2, other_node2),
-                            Middle => two.to_three(value1, other_node1).to_four(value2, other_node2),
-                            Right =>  two.to_three(value2, other_node2).to_four(value1, other_node1),
+                            Left =>   two.to_three(value1, other_node1).to_split_node(value2, other_node2),
+                            Middle => two.to_three(value1, other_node1).to_split_node(value2, other_node2),
+                            Right =>  two.to_three(value2, other_node2).to_split_node(value1, other_node1),
                             _ => panic!(""),
                         };
                         Split(new_node)
