@@ -86,7 +86,7 @@ impl <V: Ord> Three<V> {
     }
 
     fn has_value(&self, value: &V) -> bool {
-        let &Three(ref self_value1, ref self_value2, _, _, _) = self;
+        let Three(ref self_value1, ref self_value2, _, _, _) = *self;
         *self_value1 == *value || *self_value2 == *value
     }
 }
@@ -143,11 +143,11 @@ pub enum Node<V: Ord> {
 
 impl <V: Ord> Node<V> {
     fn next_direction(&self, to_insert: &V) -> Direction {
-        match self {
-            &Node::Two(Two(ref value, _, _)) =>
+        match *self {
+            Node::Two(Two(ref value, _, _)) =>
                 if to_insert < value { Left }
                 else                 { Middle },
-            &Node::Three(Three(ref value1, ref value2, _, _, _)) =>
+            Node::Three(Three(ref value1, ref value2, _, _, _)) =>
                 if      to_insert < value1 { Left }
                 else if to_insert > value2 { Right }
                 else                       { Middle },
@@ -156,11 +156,11 @@ impl <V: Ord> Node<V> {
     }
 
     fn has_value(&self, value: &V) -> bool {
-        match self {
-            &Node::LeafTwo(ref n)   => n.has_value(value),
-            &Node::LeafThree(ref n) => n.has_value(value),
-            &Node::Two(ref n)       => n.has_value(value),
-            &Node::Three(ref n)     => n.has_value(value),
+        match *self {
+            Node::LeafTwo(ref n)   => n.has_value(value),
+            Node::LeafThree(ref n) => n.has_value(value),
+            Node::Two(ref n)       => n.has_value(value),
+            Node::Three(ref n)     => n.has_value(value),
         }
     }
 
