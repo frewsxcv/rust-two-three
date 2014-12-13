@@ -1,11 +1,6 @@
 // Many of my decisions were based off the following document
 // https://web.archive.org/web/20140727185616/http://algs4.cs.princeton.edu/33balanced/
 
-
-// TODO:
-// Collection trait
-// convert this to Key/Value K/V
-
 use Direction::{Left, Middle, Right, Leaf};
 use InsertResult::{Fit, Split};
 
