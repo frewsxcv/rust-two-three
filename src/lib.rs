@@ -199,7 +199,7 @@ impl <V: Ord> Node<V> {
                 let (next_node, other_node) = match next_direction {
                     Left => (left, middle),
                     Middle => (middle, left),
-                    _ => panic!(""),
+                    _ => unreachable!(),
                 };
 
                 // Recurse, save the result of the insert
@@ -211,7 +211,7 @@ impl <V: Ord> Node<V> {
                         match next_direction {
                             Left =>   Two(value, box returned_node, box other_node),
                             Middle => Two(value, box other_node, box returned_node),
-                            _ => panic!(""),
+                            _ => unreachable!(),
                         }.as_node(),
                     Split(split_node) => split_node.to_two().to_three(value, box other_node).as_node(),
                 };
@@ -227,7 +227,7 @@ impl <V: Ord> Node<V> {
                     Left => (left, middle, right),
                     Middle => (middle, left, right),
                     Right => (right, left, middle),
-                    _ => panic!(""),
+                    _ => unreachable!(),
                 };
 
                 let insert_result = next_node.insert(to_insert);
@@ -238,7 +238,7 @@ impl <V: Ord> Node<V> {
                             Left =>   Three(value1, value2, box returned_node, other_node1, other_node2),
                             Middle => Three(value1, value2, other_node1, box returned_node, other_node2),
                             Right =>  Three(value1, value2, other_node1, other_node2, box returned_node),
-                            _ => panic!(""),
+                            _ => unreachable!(),
                         };
                         Fit(three.as_node())
                     },
@@ -248,7 +248,7 @@ impl <V: Ord> Node<V> {
                             Left =>   two.to_three(value1, other_node1).to_split_node(value2, other_node2),
                             Middle => two.to_three(value1, other_node1).to_split_node(value2, other_node2),
                             Right =>  two.to_three(value2, other_node2).to_split_node(value1, other_node1),
-                            _ => panic!(""),
+                            _ => unreachable!(),
                         };
                         Split(new_node)
                     }
