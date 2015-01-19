@@ -6,7 +6,7 @@ use two_three::{Node, TTTree, Two, Three, LeafTwo, LeafThree};
 
 #[test]
 fn it_works() {
-    let mut tree: TTTree<uint> = TTTree::new();
+    let mut tree: TTTree<u64> = TTTree::new();
 
     tree.insert(50);
     match tree {
