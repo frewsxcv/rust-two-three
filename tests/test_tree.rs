@@ -1,7 +1,8 @@
+#![feature(box_syntax)]
+
 extern crate two_three;
 
 use two_three::{Node, TTTree, Two, Three, LeafTwo, LeafThree};
-
 
 #[test]
 fn it_works() {
