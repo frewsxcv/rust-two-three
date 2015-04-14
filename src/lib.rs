@@ -15,8 +15,6 @@
 // Many of my decisions were based off the following document
 // https://web.archive.org/web/20140727185616/http://algs4.cs.princeton.edu/33balanced/
 
-#![feature(box_syntax)]
-
 use Direction::{Left, Middle, Right, Leaf};
 use InsertResult::{Fit, Split};
 
@@ -32,12 +30,12 @@ impl <V: Ord> SplitNode<V> {
         match self {
             SplitNode::LeafFour(v1, v2, v3) =>
                 Two(v2,
-                    box Node::LeafTwo(LeafTwo(v1)),
-                    box Node::LeafTwo(LeafTwo(v3))),
+                    Box::new(Node::LeafTwo(LeafTwo(v1))),
+                    Box::new(Node::LeafTwo(LeafTwo(v3)))),
             SplitNode::Four(v1, v2, v3, n1, n2, n3, n4) =>
                 Two(v2,
-                    box Node::Two(Two(v1, n1, n2)),
-                    box Node::Two(Two(v3, n3, n4))),
+                    Box::new(Node::Two(Two(v1, n1, n2))),
+                    Box::new(Node::Two(Two(v3, n3, n4)))),
         }
     }
 }
@@ -195,7 +193,7 @@ impl <V: Ord> Node<V> {
             },
 
             // Recurse down if internal Node and handle results
-            Node::Two(Two(value, box left, box middle)) => {
+            Node::Two(Two(value, left, middle)) => {
 
                 // Determine which node we'll recurse next
                 let (next_node, other_node) = match next_direction {
@@ -211,11 +209,11 @@ impl <V: Ord> Node<V> {
                 let new_node = match insert_result {
                     Fit(returned_node) =>
                         match next_direction {
-                            Left =>   Two(value, box returned_node, box other_node),
-                            Middle => Two(value, box other_node, box returned_node),
+                            Left =>   Two(value, Box::new(returned_node), other_node),
+                            Middle => Two(value, other_node, Box::new(returned_node)),
                             _ => unreachable!(),
                         }.as_node(),
-                    Split(split_node) => split_node.to_two().to_three(value, box other_node).as_node(),
+                    Split(split_node) => split_node.to_two().to_three(value, other_node).as_node(),
                 };
 
                 Fit(new_node)
@@ -237,9 +235,9 @@ impl <V: Ord> Node<V> {
                 match insert_result {
                     Fit(returned_node) => {
                         let three = match next_direction {
-                            Left =>   Three(value1, value2, box returned_node, other_node1, other_node2),
-                            Middle => Three(value1, value2, other_node1, box returned_node, other_node2),
-                            Right =>  Three(value1, value2, other_node1, other_node2, box returned_node),
+                            Left =>   Three(value1, value2, Box::new(returned_node), other_node1, other_node2),
+                            Middle => Three(value1, value2, other_node1, Box::new(returned_node), other_node2),
+                            Right =>  Three(value1, value2, other_node1, other_node2, Box::new(returned_node)),
                             _ => unreachable!(),
                         };
                         Fit(three.as_node())
