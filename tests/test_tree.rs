@@ -1,4 +1,4 @@
-#![feature(box_syntax)]
+#![feature(box_patterns)]
 
 extern crate two_three;
 
