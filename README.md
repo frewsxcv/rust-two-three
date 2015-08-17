@@ -1,6 +1,7 @@
 # rust-two-three
 
 [![Build Status](https://travis-ci.org/frewsxcv/rust-two-three.svg)](https://travis-ci.org/frewsxcv/rust-two-three)
+[![two-three on Crates.io](https://meritbadge.herokuapp.com/two-three)](https://crates.io/crates/two-three)
 
 A two-three (2-3) tree implementation in Rust.
 
