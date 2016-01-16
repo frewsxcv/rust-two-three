@@ -4,5 +4,5 @@ name = "two_three"
 description = "A two-three (2-3) tree implementation in Rust. Includes a map and set interface"
 version = "0.0.5"
 authors = ["Corey Farwell <coreyf@rwell.org>"]
-license = "Apache-2.0"
+license = "MIT/Apache-2.0"
 repository = "https://github.com/frewsxcv/rust-two-three"
