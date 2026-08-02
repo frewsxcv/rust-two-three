@@ -1,3 +1,5 @@
+**⚠️ This repository has moved to <https://tangled.org/rwell.org/rust-two-three> ⚠️**
+
 # rust-two-three
 
 [![Build Status](https://travis-ci.org/frewsxcv/rust-two-three.svg)](https://travis-ci.org/frewsxcv/rust-two-three)
